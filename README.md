@@ -22,3 +22,9 @@ This has a lot of "dependencies", in the sense of items which ought/must be defi
   LEDPIN, (if not defined, LED will not be used) and if so,
   LEDON, LEDOFF. (state of LED, allows for positive/negative logic in both senses)
   
+# Usage
+
+1. define all dependencies (the way you like them)
+   There is no longer any need to supply SSID or passphrase for networking.
+2. #include <FSM.h>
+3. in loop(), call FSM()
