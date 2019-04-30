@@ -4,18 +4,20 @@
 /*
  * Finite State Machine - for networking
  * 
- * stolen from NeoPixelClockV2
+ * evolved from NeoPixelClockV2
  * 
- * dependencies:
+ * dependencies: (must be defined/declared before including this file)
+ *
  * 	WiFi client instance
  *  mqttClient instance
  *  MDNS instance
  * 	httpServer instance
  * 	WebServer instance (?)
- *  WIFI_SSID, WIFI_PASS // replaced by SmartConfig
- *  const char* host
  * 	const char* clientID
  *  void subscribeTopics(void)
+ *  const char* willTopic, willMsg
+ *  int willQoS
+ *  boolean willRetain
  * 
  * 	conditionally:
  * 		LEDPIN, and if so,
@@ -29,7 +31,7 @@
 #define FSM_Serial false
 #endif
 
-boolean ntpInitialized = false;
+static boolean ntpInitialized = false;
 
 // Connection FSM operational states
 enum CONNECTION_STATE {
@@ -44,7 +46,8 @@ enum CONNECTION_STATE connectionState;
 
 void SmartConfig() {
   WiFi.beginSmartConfig();
-    while(1){
+  if (FSM_serial) Serial.println("Waiting for SmartConfig...");
+	while(1){
 	  #if defined(LEDPIN)
         digitalWrite(LEDPIN, LEDON);
       #endif
@@ -54,6 +57,7 @@ void SmartConfig() {
 	  #endif
       delay(500);
       if(WiFi.smartConfigDone()){
+				Wifi.endSmartConfig();
         if (FSM_Serial) Serial.println("SmartConfig Success");
         break;
       }
@@ -96,15 +100,8 @@ int i;
 			}
 		  #endif
 		  
-//		  #if defined(ESP32)
-//		  WiFi.begin(WIFI_SSID,WIFI_PASS);
-//		  Serial << "Attempt to connect to WiFi network: " << WIFI_SSID << endl;
-//		  #endif
-		  
-//		  #if defined(ESP8266)
 		  WiFi.begin();	// attempt to use saved credentials
 		  Serial << "Attempt to connect to WiFi network: " << WiFi.SSID() << endl;
-//		  #endif
 		  
 		  for (i=30; ((WiFi.status() != WL_CONNECTED) && (i>0)); --i) {
 			delay(400);
